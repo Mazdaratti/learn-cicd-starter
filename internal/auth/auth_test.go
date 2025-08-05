@@ -1,7 +1,7 @@
 package auth
 
 import (
-    "errors"
+	"errors"
 	"net/http"
 	"testing"
 )
