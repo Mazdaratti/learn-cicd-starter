@@ -21,7 +21,7 @@ jobs:
       - name: Run API tests
         run: go test -cover ./...
 
-  style_checks:
+  style:
     name: Style Check
     runs-on: ubuntu-latest
 
