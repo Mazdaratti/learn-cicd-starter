@@ -1,15 +1,10 @@
-name: Provision Infrastructure
+name: Terraform Destroy
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'infra/**'
-      - '.github/workflows/provision-infra.yml'
+  workflow_dispatch:  # Manual trigger only
 
 jobs:
-  provision:
-    name: Terraform Apply
+  destroy:
     runs-on: ubuntu-latest
 
     permissions:
@@ -49,10 +44,9 @@ jobs:
         run: terraform init
         working-directory: infra
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      - name: Destroy infrastructure
+        run: terraform destroy -auto-approve
         working-directory: infra
 
       - name: Cleanup backend.tf
         run: rm -f backend.tf
-
