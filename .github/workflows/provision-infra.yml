@@ -1,0 +1,56 @@
+name: Provision Infrastructure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/**'
+      - '.github/workflows/provision-infra.yml'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  provision:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
+          role-session-name: GitHubActionsSession
+          aws-region: ${{ secrets.TF_VAR_REGION}}
+
+      - name: Generate backend.tf
+        run: |
+          cat <<EOF > infra/backend.tf
+          terraform {
+            backend "s3" {
+              bucket         = "${{ secrets.TF_STATE_BACKEND_BUCKET_NAME }}"
+              key            = "terraform_state/statefile.tfstate"
+              region         = "${{ secrets.TF_VAR_REGION }}"
+              encrypt        = true
+              dynamodb_table = "${{ secrets.TF_STATE_LOCK_TABLE }}"
+            }
+          }
+          EOF
+          echo "Generated infrastructure/backend.tf"
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Cleanup backend.tf
+        run: rm -f backend.tf
+
