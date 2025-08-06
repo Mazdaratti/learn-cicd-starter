@@ -22,8 +22,9 @@ output "ecs_cluster_id" {
 }
 
 output "ecs_service_name" {
-  value       = module.ecs.ecs_service_name
   description = "ECS Service name"
+  value       = module.ecs.ecs_service_name
+
 }
 
 output "ecs_cluster_name" {
