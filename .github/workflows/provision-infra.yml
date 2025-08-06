@@ -44,6 +44,9 @@ jobs:
           }
           EOF
           echo "Generated infrastructure/backend.tf"
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
 
       - name: Terraform Init
         run: terraform init
