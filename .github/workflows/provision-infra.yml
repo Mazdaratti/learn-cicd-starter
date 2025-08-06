@@ -49,6 +49,10 @@ jobs:
         run: terraform init
         working-directory: infra
 
+      - name: Set Terraform variables
+        run: |
+          echo "TF_VAR_region=${{ secrets.TF_VAR_REGION }}" >> $GITHUB_ENV
+
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: infra
