@@ -50,12 +50,12 @@ module "ecs" {
   container_cpu      = 256
   container_memory   = 512
   container_port     = 80
-  execution_role_arn = module.iam.ecs_execution_role_arn
+  execution_role_arn = module.iam.ecs_task_execution_role_arn
   task_role_arn      = module.iam.ecs_task_role_arn
   service_name       = "${var.project_name}-service"
   desired_count      = 1
   subnets            = module.network.public_subnet_ids
-  security_groups    = [module.security_groups.ecs_sg_id]
+  security_groups    = [module.security_groups.ecs_service_sg_id]
   assign_public_ip   = true
   log_group_name     = "/ecs/notely"
   log_stream_prefix  = "ecs"
