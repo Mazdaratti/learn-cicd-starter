@@ -7,7 +7,7 @@ variable "region" {
 variable "project_name" {
   type        = string
   description = "Name prefix for all resources"
-  default = "Notely"
+  default = "notely"
 }
 
 variable "vpc_cidr" {
