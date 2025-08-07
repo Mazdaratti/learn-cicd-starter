@@ -63,4 +63,5 @@ module "ecs" {
 
   deployment_minimum_healthy_percent = 50
   deployment_maximum_percent         = 200
+  project_name                       = var.project_name
 }

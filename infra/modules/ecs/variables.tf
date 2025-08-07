@@ -121,3 +121,7 @@ variable "target_group_arn" {
   type        = string
 }
 
+variable "project_name" {
+  description = "Project name to prefix resources"
+  type        = string
+}
