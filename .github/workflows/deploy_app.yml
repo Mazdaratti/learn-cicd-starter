@@ -1,0 +1,80 @@
+name: Deploy Notely App
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'infra/**'
+      - 'bootstrap/**'
+      - '.github/workflows/provision-infra.yml'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
+          role-session-name: GitHubActionsSession
+          aws-region: ${{ secrets.TF_VAR_REGION }}
+
+      - name: Generate backend.tf
+        run: |
+          cat <<EOF > infra/backend.tf
+          terraform {
+            backend "s3" {
+              bucket         = "${{ secrets.TF_STATE_BACKEND_BUCKET_NAME }}"
+              key            = "terraform_state/statefile.tfstate"
+              region         = "${{ secrets.TF_VAR_REGION }}"
+              encrypt        = true
+              dynamodb_table = "${{ secrets.TF_STATE_LOCK_TABLE }}"
+            }
+          }
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+
+      - name: Retrieve Terraform outputs
+        working-directory: infra
+        run: |
+          terraform init -input=false
+          terraform output -raw ecr_repository_url > ecr_repository_url.txt
+          terraform output -raw ecs_cluster_name > ecs_cluster_name.txt
+          terraform output -raw ecs_service_name > ecs_service_name.txt
+
+          echo "ECR_REPOSITORY_URL=$(cat ecr_repository_url.txt)" >> $GITHUB_ENV
+          echo "ECS_CLUSTER_NAME=$(cat ecs_cluster_name.txt)" >> $GITHUB_ENV
+          echo "ECS_SERVICE_NAME=$(cat ecs_service_name.txt)" >> $GITHUB_ENV
+          echo "ECR_REGISTRY_URL=$(cut -d'/' -f1 ecr_repository_url.txt)" >> $GITHUB_ENV
+      
+
+      - name: Build production app
+        run: |
+          chmod +x scripts/buildprod.sh
+          ./scripts/buildprod.sh
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image to ECR with tag 'latest'
+        run: |
+          docker build -t $ECR_REPOSITORY_URL:latest .
+          docker push $ECR_REPOSITORY_URL:latest
+
+      - name: Force ECS service to redeploy (pull latest image)
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER_NAME \
+            --service $ECS_SERVICE_NAME \
+            --force-new-deployment \
+            --region ${{ secrets.TF_VAR_REGION }}
