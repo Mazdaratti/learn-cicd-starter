@@ -59,8 +59,11 @@ jobs:
 
       - name: Generate .env file
         run: |
-          echo 'PORT=8080' > .env
-
+          > .env
+          echo "PORT='8080'" >> .env
+          echo "Generated .env:"
+          cat backend/.env
+          
       - name: Build production app
         run: |
           chmod +x scripts/buildprod.sh
