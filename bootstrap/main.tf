@@ -35,59 +35,10 @@ resource "aws_iam_role" "github_actions_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "ec2_full" {
+# Attach AdministratorAccess policy to the role (for demo purposes; restrict permissions in production)
+resource "aws_iam_role_policy_attachment" "github_actions_admin" {
   role       = aws_iam_role.github_actions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
-}
-resource "aws_iam_role_policy_attachment" "ecs_full" {
-  role       = aws_iam_role.github_actions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
-}
-resource "aws_iam_role_policy_attachment" "ecr_full" {
-  role       = aws_iam_role.github_actions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
-}
-resource "aws_iam_role_policy_attachment" "logs_full" {
-  role       = aws_iam_role.github_actions_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
-}
-
-resource "aws_iam_policy" "backend_access" {
-  name        = "GitHubBackendStateAccess"
-  description = "Allow access to S3 and DynamoDB for Terraform backend"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket"
-        ],
-        Resource = [
-          "arn:aws:s3:::${var.backend_bucket_name}",
-          "arn:aws:s3:::${var.backend_bucket_name}/*"
-        ]
-      },
-      {
-        Effect = "Allow",
-        Action = [
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:DeleteItem",
-          "dynamodb:Scan"
-        ],
-        Resource = "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.dynamodb_table_name}"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "attach_backend" {
-  role       = aws_iam_role.github_actions_role.name
-  policy_arn = aws_iam_policy.backend_access.arn
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
 resource "aws_s3_bucket" "terraform_state" {
