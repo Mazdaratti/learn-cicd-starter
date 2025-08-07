@@ -27,6 +27,10 @@ jobs:
           role-session-name: GitHubActionsSession
           aws-region: ${{ secrets.TF_VAR_REGION }}
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+
       - name: Retrieve Terraform outputs
         run: |
           cd infra
