@@ -56,7 +56,10 @@ jobs:
           echo "ECS_CLUSTER_NAME=$(cat ecs_cluster_name.txt)" >> $GITHUB_ENV
           echo "ECS_SERVICE_NAME=$(cat ecs_service_name.txt)" >> $GITHUB_ENV
           echo "ECR_REGISTRY_URL=$(cut -d'/' -f1 ecr_repository_url.txt)" >> $GITHUB_ENV
-      
+
+      - name: Generate .env file
+        run: |
+          echo 'PORT=8080' > .env
 
       - name: Build production app
         run: |
