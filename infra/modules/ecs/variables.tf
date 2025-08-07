@@ -67,11 +67,6 @@ variable "environment_variables" {
   default     = []
 }
 
-variable "log_group_name" {
-  type        = string
-  description = "CloudWatch Logs group name"
-}
-
 variable "log_stream_prefix" {
   type        = string
   description = "CloudWatch Logs stream prefix"

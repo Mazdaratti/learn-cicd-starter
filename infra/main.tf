@@ -57,7 +57,6 @@ module "ecs" {
   subnets            = module.network.public_subnet_ids
   security_groups    = [module.security_groups.ecs_service_sg_id]
   assign_public_ip   = true
-  log_group_name     = "/ecs/notely"
   log_stream_prefix  = "ecs"
   target_group_arn   = module.alb.target_group_arn
   region             = var.region
