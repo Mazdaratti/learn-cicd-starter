@@ -17,9 +17,12 @@ resource "aws_lb_target_group" "this" {
   target_type = "ip"
 
   health_check {
-    port                = "8080"
-    path                = "/health"
-    protocol            = "HTTP"
+    path                = "/"           # <--- THIS IS THE FIX
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
   }
 
 }
