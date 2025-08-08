@@ -7,6 +7,7 @@ on:
       - 'infra/**'
       - 'bootstrap/**'
       - '.github/workflows/provision-infra.yml'
+      - '.github/workflows/ci'
 
 permissions:
   id-token: write
